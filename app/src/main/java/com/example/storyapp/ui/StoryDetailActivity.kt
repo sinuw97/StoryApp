@@ -39,7 +39,6 @@ class StoryDetailActivity : AppCompatActivity() {
                     // Menampilkan detail story
                     binding.tvStoryName.text = it.name
                     binding.tvStoryDescription.text = it.description
-                    binding.tvStoryDate.text = it.createdAt
                     Glide.with(this)
                         .load(it.photoUrl)
                         .placeholder(R.drawable.ic_placeholder)
