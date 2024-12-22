@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#BA0000"
     tools:context=".ui.StoryDetailActivity">
 
     <ImageView
@@ -20,6 +21,7 @@
         android:text="Story Name"
         android:textSize="20sp"
         android:textStyle="bold"
+        android:textColor="@color/white"
         app:layout_constraintTop_toBottomOf="@id/ivStoryThumbnail"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -31,6 +33,7 @@
         android:layout_height="wrap_content"
         android:text="Story Description"
         android:textSize="16sp"
+        android:textColor="@color/white"
         app:layout_constraintTop_toBottomOf="@id/tvStoryName"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

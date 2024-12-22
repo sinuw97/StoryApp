@@ -7,6 +7,12 @@ android {
     namespace = "com.example.storyapp"
     compileSdk = 35
 
+    packaging {
+        resources {
+            excludes += "META-INF/DEPENDENCIES"
+        }
+    }
+
     defaultConfig {
         applicationId = "com.example.storyapp"
         minSdk = 24
@@ -39,7 +45,8 @@ android {
 }
 
 dependencies {
-    implementation (libs.androidx.activity.ktx)
+    implementation (libs.play.services.maps.v1802)
+    implementation ("com.google.android.gms:play-services-location:21.3.0")
     implementation (libs.androidx.fragment.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -47,6 +54,8 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.firebase.appdistribution.gradle)
+    implementation(libs.androidx.room.common)
+    implementation(libs.androidx.room.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

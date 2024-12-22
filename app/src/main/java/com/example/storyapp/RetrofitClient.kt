@@ -5,6 +5,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
     private const val BASE_URL = "https://story-api.dicoding.dev/v1/"
+    private const val BASE_URL_LOCATION = "https://story-api.dicoding.dev/v1/stories?location=1"
 
     val instance: ApiService by lazy {
         val retrofit = Retrofit.Builder()

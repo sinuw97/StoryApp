@@ -5,6 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#BA0000"
     tools:context=".ui.MainActivity">
 
     <RelativeLayout
@@ -17,8 +18,6 @@
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:title="Beranda"
-            android:background="@android:color/darker_gray"
-            android:titleTextColor="@android:color/black"
             app:titleTextAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"/>
 
         <!-- Konten utama -->
@@ -26,8 +25,9 @@
             android:id="@+id/mainContent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Welcome to the Story App!"
-            android:textSize="20sp"
+            android:text="Welcome Manchunian"
+            android:textColor="@color/white"
+            android:textSize="30sp"
             android:layout_below="@id/homeToolBar"
             android:layout_marginTop="16dp"
             android:layout_centerInParent="true" />
@@ -43,15 +43,17 @@
                 android:id="@+id/btnLihatStory"
                 android:text="Lihat Story"
                 android:layout_width="wrap_content"
+                android:backgroundTint="#690000"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"/>
 
             <Button
                 android:id="@+id/btnLogOut"
-                android:text="Log out"
-                android:layout_width="wrap_content"
+                android:layout_width="122dp"
+                android:backgroundTint="#690000"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"/>
+                android:layout_gravity="center"
+                android:text="Log out" />
         </LinearLayout>
     </RelativeLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    android:background="#BA0000"
     android:layout_height="match_parent">
 
     <LinearLayout
@@ -10,39 +11,41 @@
         android:padding="45dp">
 
         <!-- Gambar -->
-        <ImageView
-            android:id="@+id/logo_profile"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:src="@drawable/dicoding"
-            android:contentDescription="@string/dicoding_profile"
-            android:layout_marginTop="50dp"
-            android:layout_marginBottom="20dp"
-            android:layout_gravity="center"/>
 
         <!-- Text Selamat Datang-->
+        <ImageView
+            android:id="@+id/logo_profile"
+            android:layout_width="209dp"
+            android:layout_height="224dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="50dp"
+            android:layout_marginBottom="20dp"
+            android:contentDescription="@string/dicoding_profile"
+            android:src="@drawable/user1" />
+
         <TextView
             android:id="@+id/welcome_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Selamat Datang"
-            android:textSize="20sp"
+            android:textSize="40sp"
             android:textStyle="bold"
-            android:textColor="@color/black" />
+            android:textColor="@color/white" />
 
         <TextView
             android:id="@+id/sub_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Di Story App"
+            android:text="glory glory manchester united"
             android:textSize="17sp"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:layout_marginBottom="22dp"/>
 
         <!-- Email -->
         <EditText
             android:id="@+id/etEmail"
             android:layout_width="match_parent"
+            android:textColor="@color/white"
             android:layout_height="wrap_content"
             android:hint="Email"
             android:inputType="textEmailAddress" />
@@ -53,6 +56,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Password"
+            android:textColor="@color/white"
             android:inputType="textPassword"
             android:layout_marginTop="8dp" />
 
@@ -62,6 +66,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Login"
+            android:backgroundTint="#690000"
             android:layout_marginTop="16dp" />
 
         <!--Register-->
@@ -69,6 +74,7 @@
             android:id="@+id/btnRegister"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:backgroundTint="#690000"
             android:text="Register"
             android:layout_marginTop="16dp" />
     </LinearLayout>

@@ -41,8 +41,9 @@ interface ApiService {
     fun uploadImage(
         @Header("Authorization") token: String,
         @Part photo: MultipartBody.Part,
-        @Part("description") description: RequestBody
+        @Part("description") description: RequestBody,
     ): Call<UploadResponse>
+
     // Endpoint untuk mengambil detail story berdasarkan ID
     @GET("stories/{id}")
     fun getStoryById(

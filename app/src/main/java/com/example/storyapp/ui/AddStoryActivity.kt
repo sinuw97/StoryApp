@@ -6,12 +6,15 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.provider.MediaStore
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import com.example.storyapp.R
 import com.example.storyapp.RetrofitClient
 import com.example.storyapp.databinding.ActivityAddStoryBinding
 import com.google.firebase.appdistribution.gradle.models.UploadResponse
@@ -47,6 +50,31 @@ class AddStoryActivity : AppCompatActivity() {
             finish()
             return
         }
+
+        // Add enter animation for views
+        binding.previewImage.alpha = 0f
+        binding.buttonContainer.alpha = 0f
+        binding.descriptionLayout.alpha = 0f
+        binding.uploadButton.alpha = 0f
+
+        binding.previewImage.animate()
+            .alpha(1f)
+            .setDuration(300)
+            .withEndAction {
+                binding.buttonContainer.animate()
+                    .alpha(1f)
+                    .setDuration(300)
+                    .withEndAction {
+                        binding.descriptionLayout.animate()
+                            .alpha(1f)
+                            .setDuration(300)
+                            .withEndAction {
+                                binding.uploadButton.animate()
+                                    .alpha(1f)
+                                    .setDuration(300)
+                            }
+                    }
+            }
 
         binding.cameraButton.setOnClickListener { startCamera() }
         binding.galleryButton.setOnClickListener { startGallery() }
@@ -171,31 +199,47 @@ class AddStoryActivity : AppCompatActivity() {
 
         val bearerToken = "Bearer $token"
 
+        // Tampilkan loading bar
+        binding.loadingProgressBar.visibility = View.VISIBLE
+
         RetrofitClient.instance.uploadImage(bearerToken, imageMultipart, descriptionRequestBody)
             .enqueue(object : Callback<UploadResponse> {
                 override fun onResponse(
                     call: Call<UploadResponse>,
                     response: Response<UploadResponse>
                 ) {
-                    if (response.isSuccessful) {
-                        Toast.makeText(this@AddStoryActivity, "Upload berhasil", Toast.LENGTH_SHORT).show()
-                        finish()
-                    } else {
-                        if (response.code() == 401) {
-                            getSharedPreferences("user_session", MODE_PRIVATE)
-                                .edit()
-                                .clear()
-                                .apply()
-                            startActivity(Intent(this@AddStoryActivity, LoginActivity::class.java))
+                    // Mensimulasikan delay sebelum loading selesai
+                    Handler(mainLooper).postDelayed({
+                        binding.loadingProgressBar.visibility = View.GONE
+
+                        if (response.isSuccessful) {
+                            Toast.makeText(this@AddStoryActivity, "Upload berhasil", Toast.LENGTH_SHORT).show()
                             finish()
                         } else {
-                            Toast.makeText(this@AddStoryActivity, "Upload gagal", Toast.LENGTH_SHORT).show()
+                            if (response.code() == 401) {
+                                getSharedPreferences("user_session", MODE_PRIVATE)
+                                    .edit()
+                                    .clear()
+                                    .apply()
+                                startActivity(Intent(this@AddStoryActivity, LoginActivity::class.java))
+                                finish()
+                            } else {
+                                Toast.makeText(
+                                    this@AddStoryActivity,
+                                    "Upload gagal",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         }
-                    }
+                    }, 2000) // Delay 2 detik
                 }
 
                 override fun onFailure(call: Call<UploadResponse>, t: Throwable) {
-                    Toast.makeText(this@AddStoryActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                    // Mensimulasikan delay sebelum loading selesai
+                    Handler(mainLooper).postDelayed({
+                        binding.loadingProgressBar.visibility = View.GONE
+                        Toast.makeText(this@AddStoryActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                    }, 2000) // Delay 2 detik
                 }
             })
     }
@@ -220,5 +264,11 @@ class AddStoryActivity : AppCompatActivity() {
             inputStream?.close()
             return myFile
         }
+    }
+
+    override fun finish() {
+        super.finish()
+        // Custom exit animation
+        overridePendingTransition(R.anim.fade_in, R.anim.slide_down)
     }
 }
