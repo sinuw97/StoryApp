@@ -36,13 +36,34 @@ interface ApiService {
         @Query("size") size: Int? = null,
         @Query("location") location: Int? = 0
     ): Call<StoryResponse>
+
+    @GET("stories")
+    suspend fun getPagedStories(
+        @Header("Authorization") token: String,
+        @Query("page") page: Int,
+        @Query("size") size: Int
+    ): StoryResponse
+
+    // Endpoint untuk upload image
     @Multipart
     @POST("stories")
     fun uploadImage(
         @Header("Authorization") token: String,
         @Part photo: MultipartBody.Part,
-        @Part("description") description: RequestBody,
+        @Part("description") description: RequestBody
     ): Call<UploadResponse>
+
+    @Multipart
+    @POST("stories")
+    fun uploadImageWithLocation(
+        @Header("Authorization") token: String,
+        @Part photo: MultipartBody.Part,
+        @Part("description") description: RequestBody,
+        @Part("lat") latitude: Double? = null,
+        @Part("lon") longitude: Double? = null
+    ): Call<UploadResponse>
+
+
 
     // Endpoint untuk mengambil detail story berdasarkan ID
     @GET("stories/{id}")

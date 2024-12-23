@@ -2,6 +2,8 @@ package com.example.storyapp.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.paging.PagingDataAdapter
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.storyapp.R
@@ -9,24 +11,18 @@ import com.example.storyapp.databinding.ItemStoryBinding
 import com.example.storyapp.models.Story
 
 class StoryAdapter(
-    private val stories: List<Story>,
-    private val onItemClickListener: (Story) -> Unit // Lambda function untuk item click
-) : RecyclerView.Adapter<StoryAdapter.StoryViewHolder>() {
+    private val onItemClickListener: (Story) -> Unit
+) : PagingDataAdapter<Story, StoryAdapter.StoryViewHolder>(DIFF_CALLBACK) {
 
     class StoryViewHolder(private val binding: ItemStoryBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(story: Story, onItemClickListener: (Story) -> Unit) {
-            // Menampilkan nama story
             binding.tvStoryTitle.text = story.name
-            // Memuat gambar menggunakan Glide
             Glide.with(binding.root.context)
-                .load(story.photoUrl) // Gambar dari URL
-                .placeholder(R.drawable.ic_placeholder) // Placeholder jika loading
-                .into(binding.ivStoryThumbnail) // Set ke ImageView
+                .load(story.photoUrl)
+                .placeholder(R.drawable.ic_placeholder)
+                .into(binding.ivStoryThumbnail)
 
-            // Set click listener
-            binding.root.setOnClickListener {
-                onItemClickListener(story) // Panggil lambda function
-            }
+            binding.root.setOnClickListener { onItemClickListener(story) }
         }
     }
 
@@ -36,10 +32,14 @@ class StoryAdapter(
     }
 
     override fun onBindViewHolder(holder: StoryViewHolder, position: Int) {
-        // Menghubungkan data story ke ViewHolder dan memberikan click listener
-        holder.bind(stories[position], onItemClickListener)
+        val story = getItem(position)
+        story?.let { holder.bind(it, onItemClickListener) }
     }
 
-    override fun getItemCount(): Int = stories.size
+    companion object {
+        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<Story>() {
+            override fun areItemsTheSame(oldItem: Story, newItem: Story): Boolean = oldItem.id == newItem.id
+            override fun areContentsTheSame(oldItem: Story, newItem: Story): Boolean = oldItem == newItem
+        }
+    }
 }
-

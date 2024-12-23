@@ -41,8 +41,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun fetchStoriesWithLocation() {
-        val sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE)
-        val token = sharedPreferences.getString("auth_token", null)
+        val sharedPreferences = getSharedPreferences("user_session", MODE_PRIVATE)
+        val token = sharedPreferences.getString("token", null)
 
         // Hanya lakukan redirect jika token tidak ada
         if (token.isNullOrEmpty()) {

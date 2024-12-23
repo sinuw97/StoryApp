@@ -3,20 +3,26 @@ package com.example.storyapp.ui
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.location.Location
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import com.example.storyapp.R
 import com.example.storyapp.RetrofitClient
 import com.example.storyapp.databinding.ActivityAddStoryBinding
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.Task
 import com.google.firebase.appdistribution.gradle.models.UploadResponse
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -36,12 +42,16 @@ class AddStoryActivity : AppCompatActivity() {
     private var currentPhotoPath: String? = null
     private var getFile: File? = null
     private lateinit var token: String
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private var latitude: Double? = null
+    private var longitude: Double? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddStoryBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Ambil token user dari shared preferences
         val preferences = getSharedPreferences("user_session", MODE_PRIVATE)
         token = preferences.getString("token", "") ?: ""
 
@@ -51,34 +61,21 @@ class AddStoryActivity : AppCompatActivity() {
             return
         }
 
-        // Add enter animation for views
-        binding.previewImage.alpha = 0f
-        binding.buttonContainer.alpha = 0f
-        binding.descriptionLayout.alpha = 0f
-        binding.uploadButton.alpha = 0f
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        binding.previewImage.animate()
-            .alpha(1f)
-            .setDuration(300)
-            .withEndAction {
-                binding.buttonContainer.animate()
-                    .alpha(1f)
-                    .setDuration(300)
-                    .withEndAction {
-                        binding.descriptionLayout.animate()
-                            .alpha(1f)
-                            .setDuration(300)
-                            .withEndAction {
-                                binding.uploadButton.animate()
-                                    .alpha(1f)
-                                    .setDuration(300)
-                            }
-                    }
-            }
+        // Setup animasi
+        animateViews()
 
         binding.cameraButton.setOnClickListener { startCamera() }
         binding.galleryButton.setOnClickListener { startGallery() }
         binding.uploadButton.setOnClickListener { uploadImage() }
+
+        // Cek izin lokasi
+        if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
+            getLastLocation()
+        } else {
+            requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
+        }
     }
 
     private val launcherIntentCamera = registerForActivityResult(
@@ -97,7 +94,7 @@ class AddStoryActivity : AppCompatActivity() {
         if (result.resultCode == RESULT_OK) {
             val selectedImg = result.data?.data as Uri
             selectedImg.let { uri ->
-                val file = uriToFile(uri, this)
+                val file = uriToFile(uri)
                 getFile = file
                 binding.previewImage.setImageURI(uri)
             }
@@ -105,27 +102,18 @@ class AddStoryActivity : AppCompatActivity() {
     }
 
     private val requestPermissionLauncher =
-        registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()
-        ) { permissions ->
-            when {
-                permissions[Manifest.permission.CAMERA] ?: false -> startCamera()
-                permissions[if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    Manifest.permission.READ_MEDIA_IMAGES
-                } else {
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                }] ?: false -> startGallery()
-                else -> {
-                    Toast.makeText(this, "Izin ditolak", Toast.LENGTH_SHORT).show()
-                }
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            if (permissions[Manifest.permission.CAMERA] == true) {
+                startCamera()
+            } else if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true) {
+                getLastLocation()
+            } else {
+                Toast.makeText(this, "Izin ditolak", Toast.LENGTH_SHORT).show()
             }
         }
 
     private fun checkPermission(permission: String): Boolean {
-        return ContextCompat.checkSelfPermission(
-            this,
-            permission
-        ) == PackageManager.PERMISSION_GRANTED
+        return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
     }
 
     private fun startCamera() {
@@ -135,140 +123,105 @@ class AddStoryActivity : AppCompatActivity() {
         }
 
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        createCustomTempFile(application).also {
+        createCustomTempFile().also { file ->
             val photoURI: Uri = FileProvider.getUriForFile(
-                this@AddStoryActivity,
+                this,
                 "${applicationContext.packageName}.fileprovider",
-                it
+                file
             )
-            currentPhotoPath = it.absolutePath
+            currentPhotoPath = file.absolutePath
             intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-            try {
-                launcherIntentCamera.launch(intent)
-            } catch (e: Exception) {
-                Toast.makeText(this, "Gagal membuka kamera", Toast.LENGTH_SHORT).show()
-            }
+            launcherIntentCamera.launch(intent)
         }
     }
 
     private fun startGallery() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (!checkPermission(Manifest.permission.READ_MEDIA_IMAGES)) {
-                requestPermissionLauncher.launch(arrayOf(Manifest.permission.READ_MEDIA_IMAGES))
-                return
-            }
-        } else {
-            if (!checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                requestPermissionLauncher.launch(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE))
-                return
-            }
-        }
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.type = "image/*"
+        launcherIntentGallery.launch(Intent.createChooser(intent, "Pilih gambar"))
+    }
 
-        val intent = Intent().apply {
-            action = Intent.ACTION_GET_CONTENT
-            type = "image/*"
-        }
-        try {
-            val chooser = Intent.createChooser(intent, "Pilih gambar")
-            launcherIntentGallery.launch(chooser)
-        } catch (e: Exception) {
-            Toast.makeText(this, "Gagal membuka galeri", Toast.LENGTH_SHORT).show()
-        }
+    private fun reduceImageSize(file: File): File {
+        val bitmap = BitmapFactory.decodeFile(file.path)
+        val reducedBitmap = Bitmap.createScaledBitmap(bitmap, 800, 800, true)
+        val outputFile = createCustomTempFile()
+        val outputStream = FileOutputStream(outputFile)
+        reducedBitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
+        outputStream.close()
+        return outputFile
     }
 
     private fun uploadImage() {
-        if (getFile == null) {
-            Toast.makeText(this, "Silakan pilih gambar terlebih dahulu", Toast.LENGTH_SHORT).show()
+        if (getFile == null || binding.descriptionEditText.text!!.isEmpty()) {
+            Toast.makeText(this, "Lengkapi data terlebih dahulu", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val description = binding.descriptionEditText.text.toString()
-        if (description.isEmpty()) {
-            Toast.makeText(this, "Deskripsi tidak boleh kosong", Toast.LENGTH_SHORT).show()
-            return
-        }
+        val description = binding.descriptionEditText.text.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+        val reducedFile = reduceImageSize(getFile!!)
+        val requestImageFile = reducedFile.asRequestBody("image/jpeg".toMediaTypeOrNull())
+        val imageMultipart = MultipartBody.Part.createFormData("photo", reducedFile.name, requestImageFile)
 
-        val file = getFile as File
-        val requestImageFile = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
-        val imageMultipart: MultipartBody.Part = MultipartBody.Part.createFormData(
-            "photo",
-            file.name,
-            requestImageFile
-        )
-        val descriptionRequestBody = description.toRequestBody("text/plain".toMediaTypeOrNull())
-
-        val bearerToken = "Bearer $token"
-
-        // Tampilkan loading bar
         binding.loadingProgressBar.visibility = View.VISIBLE
 
-        RetrofitClient.instance.uploadImage(bearerToken, imageMultipart, descriptionRequestBody)
-            .enqueue(object : Callback<UploadResponse> {
-                override fun onResponse(
-                    call: Call<UploadResponse>,
-                    response: Response<UploadResponse>
-                ) {
-                    // Mensimulasikan delay sebelum loading selesai
-                    Handler(mainLooper).postDelayed({
-                        binding.loadingProgressBar.visibility = View.GONE
-
-                        if (response.isSuccessful) {
-                            Toast.makeText(this@AddStoryActivity, "Upload berhasil", Toast.LENGTH_SHORT).show()
-                            finish()
-                        } else {
-                            if (response.code() == 401) {
-                                getSharedPreferences("user_session", MODE_PRIVATE)
-                                    .edit()
-                                    .clear()
-                                    .apply()
-                                startActivity(Intent(this@AddStoryActivity, LoginActivity::class.java))
-                                finish()
-                            } else {
-                                Toast.makeText(
-                                    this@AddStoryActivity,
-                                    "Upload gagal",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
-                    }, 2000) // Delay 2 detik
+        RetrofitClient.instance.uploadImageWithLocation(
+            "Bearer $token", imageMultipart, description, latitude, longitude
+        ).enqueue(object : Callback<UploadResponse> {
+            override fun onResponse(call: Call<UploadResponse>, response: Response<UploadResponse>) {
+                binding.loadingProgressBar.visibility = View.GONE
+                if (response.isSuccessful) {
+                    Toast.makeText(this@AddStoryActivity, "Upload berhasil", Toast.LENGTH_SHORT).show()
+                    finish()
+                } else {
+                    Toast.makeText(this@AddStoryActivity, "Upload gagal", Toast.LENGTH_SHORT).show()
                 }
-
-                override fun onFailure(call: Call<UploadResponse>, t: Throwable) {
-                    // Mensimulasikan delay sebelum loading selesai
-                    Handler(mainLooper).postDelayed({
-                        binding.loadingProgressBar.visibility = View.GONE
-                        Toast.makeText(this@AddStoryActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
-                    }, 2000) // Delay 2 detik
-                }
-            })
-    }
-
-    companion object {
-        private fun createCustomTempFile(context: android.content.Context): File {
-            val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-            val storageDir: File? = context.getExternalFilesDir(null)
-            return File.createTempFile(timeStamp, ".jpg", storageDir)
-        }
-
-        private fun uriToFile(uri: Uri, context: android.content.Context): File {
-            val myFile = createCustomTempFile(context)
-            val inputStream = context.contentResolver.openInputStream(uri) as? java.io.InputStream
-            val outputStream = FileOutputStream(myFile)
-            val buffer = ByteArray(1024)
-            var length: Int
-            while (inputStream?.read(buffer).also { length = it ?: -1 } != -1) {
-                outputStream.write(buffer, 0, length)
             }
-            outputStream.close()
-            inputStream?.close()
-            return myFile
+
+            override fun onFailure(call: Call<UploadResponse>, t: Throwable) {
+                binding.loadingProgressBar.visibility = View.GONE
+                Toast.makeText(this@AddStoryActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun getLastLocation() {
+        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+            location?.let {
+                latitude = it.latitude
+                longitude = it.longitude
+            }
         }
     }
 
-    override fun finish() {
-        super.finish()
-        // Custom exit animation
-        overridePendingTransition(R.anim.fade_in, R.anim.slide_down)
+    private fun animateViews() {
+        binding.previewImage.alpha = 0f
+        binding.buttonContainer.alpha = 0f
+        binding.descriptionLayout.alpha = 0f
+        binding.uploadButton.alpha = 0f
+
+        binding.previewImage.animate().alpha(1f).setDuration(300).withEndAction {
+            binding.buttonContainer.animate().alpha(1f).setDuration(300).withEndAction {
+                binding.descriptionLayout.animate().alpha(1f).setDuration(300).withEndAction {
+                    binding.uploadButton.animate().alpha(1f).setDuration(300)
+                }
+            }
+        }
+    }
+
+    private fun createCustomTempFile(): File {
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+        val storageDir = getExternalFilesDir(null)
+        return File.createTempFile(timeStamp, ".jpg", storageDir)
+    }
+
+    private fun uriToFile(uri: Uri): File {
+        val contentResolver = contentResolver
+        val myFile = createCustomTempFile()
+        val inputStream = contentResolver.openInputStream(uri)!!
+        val outputStream = FileOutputStream(myFile)
+        inputStream.copyTo(outputStream)
+        inputStream.close()
+        outputStream.close()
+        return myFile
     }
 }
