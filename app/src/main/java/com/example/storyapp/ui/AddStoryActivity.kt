@@ -169,7 +169,7 @@ class AddStoryActivity : AppCompatActivity() {
                 binding.loadingProgressBar.visibility = View.GONE
                 if (response.isSuccessful) {
                     Toast.makeText(this@AddStoryActivity, "Upload berhasil", Toast.LENGTH_SHORT).show()
-                    setResult(RESULT_OK) // Tambahkan ini
+                    setResult(RESULT_OK)
                     finish()
                 } else {
                     Toast.makeText(this@AddStoryActivity, "Upload gagal", Toast.LENGTH_SHORT).show()

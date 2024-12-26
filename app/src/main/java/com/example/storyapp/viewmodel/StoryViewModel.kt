@@ -25,6 +25,7 @@ class StoryViewModel : ViewModel() {
     val storyDetail: LiveData<Story> get() = _storyDetail
 
 
+
     fun fetchStories(token: String, page: Int? = null, size: Int? = null, location: Int? = 0) {
         RetrofitClient.instance.getAllStories("Bearer $token", page, size, location)
             .enqueue(object : Callback<StoryResponse> {

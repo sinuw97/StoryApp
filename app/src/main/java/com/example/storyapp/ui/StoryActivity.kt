@@ -88,7 +88,7 @@ class StoryActivity : AppCompatActivity() {
                         .setDuration(100)
                         .withEndAction {
                             val intent = Intent(this, AddStoryActivity::class.java)
-                            launcherAddStory.launch(intent) // Gunakan launcher di sini
+                            launcherAddStory.launch(intent)
                             overridePendingTransition(R.anim.slide_up, R.anim.fade_out)
                         }
                 }
@@ -98,7 +98,6 @@ class StoryActivity : AppCompatActivity() {
     private val launcherAddStory =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
-                // Muat ulang data cerita
                 refreshStories()
             }
         }
