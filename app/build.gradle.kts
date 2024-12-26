@@ -45,7 +45,7 @@ android {
 }
 
 dependencies {
-    implementation ("androidx.paging:paging-runtime:3.3.5")
+    implementation ("androidx.paging:paging-runtime-ktx:3.3.5")
     implementation (libs.play.services.maps.v1802)
     implementation ("com.google.android.gms:play-services-location:21.3.0")
     implementation (libs.androidx.fragment.ktx)

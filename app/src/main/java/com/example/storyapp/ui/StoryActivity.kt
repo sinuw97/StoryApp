@@ -2,6 +2,7 @@ package com.example.storyapp.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -9,17 +10,24 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.paging.PagingData
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.storyapp.ApiService
 import com.example.storyapp.R
+import com.example.storyapp.RetrofitClient
 import com.example.storyapp.adapter.StoryAdapter
 import com.example.storyapp.databinding.ActivityStoryListBinding
+import com.example.storyapp.models.Story
 import com.example.storyapp.viewmodel.StoryViewModel
+import com.example.storyapp.viewmodel.StoryViewModelFactory
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class StoryActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityStoryListBinding
-    private val storyViewModel: StoryViewModel by viewModels()
+    private lateinit var storyViewModel: StoryViewModel
     private lateinit var storyAdapter: StoryAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,6 +36,14 @@ class StoryActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.listToolBar)
 
+        val apiService = RetrofitClient.instance
+        val sharedPreferences = getSharedPreferences("user_session", MODE_PRIVATE)
+
+        storyViewModel = ViewModelProvider(
+            this,
+            StoryViewModelFactory(apiService, sharedPreferences)
+        ).get(StoryViewModel::class.java)
+
         setupRecyclerView()
         setupObservers()
         setupFabAnimation()
@@ -35,7 +51,7 @@ class StoryActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        storyAdapter = StoryAdapter(listOf()) { story ->
+        storyAdapter = StoryAdapter { story ->
             val intent = Intent(this, StoryDetailActivity::class.java).apply {
                 putExtra("story_id", story.id)
             }
@@ -48,24 +64,18 @@ class StoryActivity : AppCompatActivity() {
     }
 
     private fun setupObservers() {
-        storyViewModel.stories.observe(this, Observer { stories ->
-            if (stories != null) {
-                storyAdapter = StoryAdapter(stories) { story ->
-                    val intent = Intent(this, StoryDetailActivity::class.java).apply {
-                        putExtra("story_id", story.id)
-                    }
-                    startActivity(intent)
-                }
-                binding.rvStories.adapter = storyAdapter
-
-                binding.rvStories.alpha = 0f
-                binding.rvStories.animate()
-                    .alpha(1f)
-                    .setDuration(500)
-                    .start()
-            }
+        // Observe PagingData from ViewModel
+        storyViewModel.stories.observe(this, Observer { pagingData ->
+            Log.d("StoryActivity", "Received paging data: ${pagingData}")
+            storyAdapter.submitData(lifecycle, pagingData)
+            binding.rvStories.alpha = 0f
+            binding.rvStories.animate()
+                .alpha(1f)
+                .setDuration(500)
+                .start()
         })
 
+        // Observe error messages
         storyViewModel.errorMessage.observe(this, Observer { error ->
             error?.let {
                 Toast.makeText(this, it, Toast.LENGTH_LONG).show()

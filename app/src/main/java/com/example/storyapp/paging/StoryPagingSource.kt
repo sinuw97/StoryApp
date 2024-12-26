@@ -11,23 +11,23 @@ class StoryPagingSource(
 ) : PagingSource<Int, Story>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Story> {
+        val page = params.key ?: 1
+
         return try {
-            val position = params.key ?: 1
-            val response = apiService.getPagedStories("Bearer $token", position, params.loadSize)
+            val response = apiService.getPagedStories("Bearer $token", page, params.loadSize)
+            val stories = response.listStory
+
             LoadResult.Page(
-                data = response.listStory,
-                prevKey = if (position == 1) null else position - 1,
-                nextKey = if (response.listStory.isEmpty()) null else position + 1
+                data = stories,
+                prevKey = if (page == 1) null else page - 1,
+                nextKey = if (stories.isEmpty()) null else page + 1
             )
-        } catch (exception: Exception) {
-            LoadResult.Error(exception)
+        } catch (e: Exception) {
+            LoadResult.Error(e)
         }
     }
 
     override fun getRefreshKey(state: PagingState<Int, Story>): Int? {
-        return state.anchorPosition?.let { anchor ->
-            state.closestPageToPosition(anchor)?.prevKey?.plus(1)
-                ?: state.closestPageToPosition(anchor)?.nextKey?.minus(1)
-        }
+        return state.anchorPosition?.let { state.closestPageToPosition(it)?.prevKey }
     }
 }

@@ -44,7 +44,6 @@ interface ApiService {
         @Query("size") size: Int
     ): StoryResponse
 
-
     @Multipart
     @POST("stories")
     fun uploadImage(
