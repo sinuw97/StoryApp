@@ -44,7 +44,7 @@ interface ApiService {
         @Query("size") size: Int
     ): StoryResponse
 
-    // Endpoint untuk upload image
+
     @Multipart
     @POST("stories")
     fun uploadImage(
@@ -65,10 +65,10 @@ interface ApiService {
 
 
 
-    // Endpoint untuk mengambil detail story berdasarkan ID
+
     @GET("stories/{id}")
     fun getStoryById(
         @Header("Authorization") token: String,
-        @Path("id") id: String // id adalah parameter path yang akan diambil dari URL
+        @Path("id") id: String
     ): Call<StoryDetailResponse>
 }

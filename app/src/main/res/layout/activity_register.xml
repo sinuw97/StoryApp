@@ -1,9 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="#BA0000"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#BA0000"
     tools:context="com.example.storyapp.ui.RegisterActivity">
 
     <LinearLayout
@@ -13,32 +12,51 @@
         android:padding="45dp"
         android:layout_marginTop="0dp">
 
-        <!-- Text Selamat Datang-->
-        <TextView
-            android:id="@+id/register_text"
-            android:layout_width="wrap_content"
+        <!-- Text and Image -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Register"
-            android:textSize="50sp"
-            android:textStyle="bold"
-            android:textColor="@color/white"
-            />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/welcome_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Silahkan Buat Akun Anda"
-            android:textSize="20sp"
-            android:textColor="@color/white"
-            android:layout_marginBottom="20dp"/>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/register_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Register"
+                    android:textSize="50sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white" />
+
+                <TextView
+                    android:id="@+id/welcome_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Silahkan Buat Akun Anda"
+                    android:textSize="20sp"
+                    android:textColor="@color/white"
+                    android:layout_marginTop="8dp" />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/icon_image"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginStart="8dp"
+                android:contentDescription="Icon" />
+        </LinearLayout>
 
         <!-- Nama -->
         <EditText
             android:id="@+id/etName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/black"
             android:hint="Name"
             android:inputType="textPersonName" />
 
@@ -48,9 +66,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Email"
-            android:textColor="@color/white"
-            android:inputType="textEmailAddress"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="8dp"
+            android:inputType="textEmailAddress" />
 
         <!-- Password -->
         <com.example.storyapp.CustomEditText
@@ -58,18 +75,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Password"
-            android:textColor="@color/white"
-            android:inputType="textPassword"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="8dp"
+            android:inputType="textPassword" />
 
-        <!--Register-->
+        <!-- Register -->
         <Button
             android:id="@+id/btnRegister"
             android:layout_width="225dp"
             android:layout_height="64dp"
             android:layout_marginTop="16dp"
-            android:backgroundTint="#690000"
             android:layout_gravity="center"
+            android:backgroundTint="#690000"
             android:text="Register" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

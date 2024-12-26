@@ -51,7 +51,6 @@ class AddStoryActivity : AppCompatActivity() {
         binding = ActivityAddStoryBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Ambil token user dari shared preferences
         val preferences = getSharedPreferences("user_session", MODE_PRIVATE)
         token = preferences.getString("token", "") ?: ""
 
@@ -62,15 +61,13 @@ class AddStoryActivity : AppCompatActivity() {
         }
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
-        // Setup animasi
         animateViews()
 
         binding.cameraButton.setOnClickListener { startCamera() }
         binding.galleryButton.setOnClickListener { startGallery() }
         binding.uploadButton.setOnClickListener { uploadImage() }
 
-        // Cek izin lokasi
+        // izin lokasi
         if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
             getLastLocation()
         } else {
@@ -167,15 +164,18 @@ class AddStoryActivity : AppCompatActivity() {
         RetrofitClient.instance.uploadImageWithLocation(
             "Bearer $token", imageMultipart, description, latitude, longitude
         ).enqueue(object : Callback<UploadResponse> {
+
             override fun onResponse(call: Call<UploadResponse>, response: Response<UploadResponse>) {
                 binding.loadingProgressBar.visibility = View.GONE
                 if (response.isSuccessful) {
                     Toast.makeText(this@AddStoryActivity, "Upload berhasil", Toast.LENGTH_SHORT).show()
+                    setResult(RESULT_OK) // Tambahkan ini
                     finish()
                 } else {
                     Toast.makeText(this@AddStoryActivity, "Upload gagal", Toast.LENGTH_SHORT).show()
                 }
             }
+
 
             override fun onFailure(call: Call<UploadResponse>, t: Throwable) {
                 binding.loadingProgressBar.visibility = View.GONE
@@ -184,6 +184,7 @@ class AddStoryActivity : AppCompatActivity() {
         })
     }
 
+    //merah dikit ga ngaruh :v
     private fun getLastLocation() {
         fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
             location?.let {

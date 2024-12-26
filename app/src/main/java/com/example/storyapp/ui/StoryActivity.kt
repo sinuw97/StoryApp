@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -25,8 +26,6 @@ class StoryActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityStoryListBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // Aktifkan toolbar
         setSupportActionBar(binding.listToolBar)
 
         setupRecyclerView()
@@ -59,7 +58,6 @@ class StoryActivity : AppCompatActivity() {
                 }
                 binding.rvStories.adapter = storyAdapter
 
-                // Add fade-in animation for RecyclerView
                 binding.rvStories.alpha = 0f
                 binding.rvStories.animate()
                     .alpha(1f)
@@ -79,26 +77,31 @@ class StoryActivity : AppCompatActivity() {
         val fab: FloatingActionButton = binding.btnAddStory
 
         fab.setOnClickListener {
-            // Scale down animation
             fab.animate()
                 .scaleX(0.8f)
                 .scaleY(0.8f)
                 .setDuration(100)
                 .withEndAction {
-                    // Scale up animation
                     fab.animate()
                         .scaleX(1f)
                         .scaleY(1f)
                         .setDuration(100)
                         .withEndAction {
-                            // Start AddStoryActivity with custom animation
                             val intent = Intent(this, AddStoryActivity::class.java)
-                            startActivity(intent)
+                            launcherAddStory.launch(intent) // Gunakan launcher di sini
                             overridePendingTransition(R.anim.slide_up, R.anim.fade_out)
                         }
                 }
         }
     }
+
+    private val launcherAddStory =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                // Muat ulang data cerita
+                refreshStories()
+            }
+        }
 
     private fun loadStories() {
         val preferences = getSharedPreferences("user_session", MODE_PRIVATE)
@@ -119,21 +122,23 @@ class StoryActivity : AppCompatActivity() {
                 animateRefresh()
                 true
             }
+
             R.id.menu_logout -> {
                 logout()
                 true
             }
+
             R.id.menu_maps -> {
                 val intent = Intent(this, MapsActivity::class.java)
                 startActivity(intent)
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
 
     private fun animateRefresh() {
-        // Fade out animation for RecyclerView
         binding.rvStories.animate()
             .alpha(0f)
             .setDuration(300)
@@ -153,7 +158,6 @@ class StoryActivity : AppCompatActivity() {
     }
 
     private fun logout() {
-        // Fade out animation before logout
         binding.root.animate()
             .alpha(0f)
             .setDuration(300)
@@ -169,7 +173,6 @@ class StoryActivity : AppCompatActivity() {
             }
     }
 
-    // Handle animation when returning from AddStoryActivity
     override fun onResume() {
         super.onResume()
         binding.btnAddStory.apply {

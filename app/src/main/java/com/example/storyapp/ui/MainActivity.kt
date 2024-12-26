@@ -13,7 +13,6 @@ import com.example.storyapp.R
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Mode terang
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
@@ -23,14 +22,13 @@ class MainActivity : AppCompatActivity() {
         val btnLogOut = findViewById<Button>(R.id.btnLogOut);
         val tvWelcome = findViewById<TextView>(R.id.mainContent)
 
-        val toolbar: Toolbar = findViewById(R.id.homeToolBar)
-        setSupportActionBar(toolbar)
 
-        // Mengecek status login dari SharedPreferences
+
+
         val preferences = getSharedPreferences("user_session", MODE_PRIVATE)
-        val isLoggedIn = preferences.getBoolean("is_logged_in", false) // default false jika tidak ditemukan
+        val isLoggedIn = preferences.getBoolean("is_logged_in", false)
 
-        // Jika belum login, arahkan ke LoginActivity
+
         if (!isLoggedIn) {
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
@@ -42,7 +40,6 @@ class MainActivity : AppCompatActivity() {
 
         // LogOut
         btnLogOut.setOnClickListener {
-            // Hapus sesi
             val editor = preferences.edit()
             editor.remove("is_logged_in")
             editor.remove("user_token")
@@ -53,14 +50,13 @@ class MainActivity : AppCompatActivity() {
             finish()
         }
 
-        // Lihat Story
         btnLihatStory.setOnClickListener{
             val intent = Intent(this, StoryActivity::class.java)
             startActivity(intent)
             finish()
         }
 
-//        // Tambah Story
+//
 //        btnAddStory.setOnClickListener{
 //
 //        }

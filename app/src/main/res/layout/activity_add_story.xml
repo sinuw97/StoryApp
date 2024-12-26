@@ -59,6 +59,9 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="16dp"
+        android:textColorHint="@color/white"
+        app:boxStrokeColor="@color/white"
+        app:hintTextColor="@color/white"
         app:layout_constraintTop_toBottomOf="@id/buttonContainer">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -76,6 +79,7 @@
         android:layout_width="wrap_content"
         android:backgroundTint="@color/white"
         android:layout_height="wrap_content"
+        android:buttonTint="@color/white"
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="8dp"
         android:text="Gunakan Lokasi Saya"

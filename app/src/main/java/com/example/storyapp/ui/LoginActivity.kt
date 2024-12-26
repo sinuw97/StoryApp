@@ -1,7 +1,7 @@
 package com.example.storyapp.ui
 
-import android.animation.ObjectAnimator
 import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
+import com.bumptech.glide.Glide
 import com.example.storyapp.R
 import com.example.storyapp.RetrofitClient
 import com.example.storyapp.models.LoginRequest
@@ -32,15 +33,19 @@ class LoginActivity : AppCompatActivity() {
         val btnLogin = findViewById<Button>(R.id.btnLogin)
         val btnRegister = findViewById<Button>(R.id.btnRegister)
 
+        Glide.with(this)
+            .load(R.drawable.user1)
+            .override(500, 500)
+            .into(logoImageView)
+
         val moveLeft = ObjectAnimator.ofFloat(logoImageView, "translationX", -500f)
         val moveRight = ObjectAnimator.ofFloat(logoImageView, "translationX", 500f)
 
-        moveLeft.duration = 15000 // 15 seconds for left movement
-        moveRight.duration = 15000 // 15 seconds for right movement
+        moveLeft.duration = 15000
+        moveRight.duration = 15000
 
-
-        moveLeft.repeatCount = ObjectAnimator.INFINITE // Repeat indefinitely
-        moveRight.repeatCount = ObjectAnimator.INFINITE // Repeat indefinitely
+        moveLeft.repeatCount = ObjectAnimator.INFINITE
+        moveRight.repeatCount = ObjectAnimator.INFINITE
 
         moveLeft.repeatMode = ObjectAnimator.REVERSE
         moveRight.repeatMode = ObjectAnimator.REVERSE
@@ -66,7 +71,11 @@ class LoginActivity : AppCompatActivity() {
         btnRegisterAnimation.duration = 1000
 
         val animatorSet2 = AnimatorSet()
-        animatorSet2.playTogether(emailAnimation, emailTranslate, passwordAnimation, passwordTranslate, btnLoginAnimation, btnRegisterAnimation)
+        animatorSet2.playTogether(
+            emailAnimation, emailTranslate,
+            passwordAnimation, passwordTranslate,
+            btnLoginAnimation, btnRegisterAnimation
+        )
         animatorSet2.start()
 
         btnLogin.setOnClickListener {
@@ -116,7 +125,6 @@ class LoginActivity : AppCompatActivity() {
             }
         }
 
-        // Register Button click listener
         btnRegister.setOnClickListener {
             val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)

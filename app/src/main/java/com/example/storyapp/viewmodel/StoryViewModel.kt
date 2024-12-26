@@ -13,19 +13,18 @@ import retrofit2.Response
 
 class StoryViewModel : ViewModel() {
 
-    // LiveData untuk menyimpan data stories
     private val _stories = MutableLiveData<List<Story>>()
     val stories: LiveData<List<Story>> get() = _stories
 
-    // LiveData untuk menyimpan error message
+
     private val _errorMessage = MutableLiveData<String>()
     val errorMessage: LiveData<String> get() = _errorMessage
 
-    // LiveData untuk menyimpan detail story
+
     private val _storyDetail = MutableLiveData<Story>()
     val storyDetail: LiveData<Story> get() = _storyDetail
 
-    // Fungsi untuk mengambil stories dari API
+
     fun fetchStories(token: String, page: Int? = null, size: Int? = null, location: Int? = 0) {
         RetrofitClient.instance.getAllStories("Bearer $token", page, size, location)
             .enqueue(object : Callback<StoryResponse> {
@@ -43,10 +42,9 @@ class StoryViewModel : ViewModel() {
             })
     }
 
-    // Fungsi untuk mengambil detail story berdasarkan ID
     fun fetchStoryById(token: String, id: String) {
         RetrofitClient.instance.getStoryById("Bearer $token", id)
-            .enqueue(object : Callback<StoryDetailResponse> {  // Menggunakan StoryDetailResponse
+            .enqueue(object : Callback<StoryDetailResponse> {
                 override fun onResponse(call: Call<StoryDetailResponse>, response: Response<StoryDetailResponse>) =
                     if (response.isSuccessful) {
                         val story = response.body()?.story
@@ -59,7 +57,7 @@ class StoryViewModel : ViewModel() {
                         _errorMessage.postValue("Failed to fetch story: ${response.message()}")
                     }
 
-                override fun onFailure(call: Call<StoryDetailResponse>, t: Throwable) { // Menggunakan StoryDetailResponse
+                override fun onFailure(call: Call<StoryDetailResponse>, t: Throwable) {
                     _errorMessage.postValue("Error: ${t.message}")
                 }
             })

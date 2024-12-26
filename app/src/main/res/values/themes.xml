@@ -2,6 +2,7 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.StoryApp" parent="Theme.Material3.Light.NoActionBar">
         <item name="android:statusBarColor">#BA0000</item>
+        <item name="android:textColorPrimary">@color/white</item>
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>

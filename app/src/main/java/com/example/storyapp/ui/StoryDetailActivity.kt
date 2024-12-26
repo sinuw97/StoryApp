@@ -19,23 +19,23 @@ class StoryDetailActivity : AppCompatActivity() {
         binding = ActivityStoriesDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Ambil story_id dari Intent
+
         val storyId = intent.getStringExtra("story_id")
 
-        // Periksa apakah storyId ada
+
         if (storyId != null) {
             val preferences = getSharedPreferences("user_session", MODE_PRIVATE)
             val token = preferences.getString("token", null)
 
             token?.let {
-                // Fetch detail story berdasarkan ID
+
                 storyViewModel.fetchStoryById(it, storyId)
             }
 
-            // Observe perubahan data story
+
             storyViewModel.storyDetail.observe(this, Observer { story ->
                 story?.let {
-                    // Menampilkan detail story
+
                     binding.tvStoryName.text = it.name
                     binding.tvStoryDescription.text = it.description
                     Glide.with(this)

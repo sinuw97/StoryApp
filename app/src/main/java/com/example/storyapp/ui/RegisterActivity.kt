@@ -5,9 +5,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import com.bumptech.glide.Glide
 import com.example.storyapp.R
 import com.example.storyapp.R.layout.activity_register
 import com.example.storyapp.RetrofitClient
@@ -24,6 +26,10 @@ class RegisterActivity : AppCompatActivity() {
         // Mode terang
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         setContentView(activity_register)
+        // Load gambar menggunakan Glide
+        Glide.with(this)
+            .load(R.drawable.pemain) // Ganti dengan nama gambar yang ada di drawable
+            .into(findViewById<ImageView>(R.id.icon_image))
 
         val etName = findViewById<EditText>(R.id.etName);
         val etEmail = findViewById<EditText>(R.id.etEmail);

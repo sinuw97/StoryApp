@@ -28,7 +28,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Inisialisasi MapView
+
         binding.mapView.onCreate(savedInstanceState)
         binding.mapView.getMapAsync(this)
     }
@@ -36,7 +36,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
 
-        // Panggil API untuk mendapatkan data story dengan lokasi
         fetchStoriesWithLocation()
     }
 
@@ -44,15 +43,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val sharedPreferences = getSharedPreferences("user_session", MODE_PRIVATE)
         val token = sharedPreferences.getString("token", null)
 
-        // Hanya lakukan redirect jika token tidak ada
+
         if (token.isNullOrEmpty()) {
-            // Jika token tidak ditemukan, arahkan ke halaman login
+
             Toast.makeText(this, "Token tidak valid, silakan login ulang", Toast.LENGTH_SHORT).show()
             redirectToLogin()
             return
         }
 
-        // Memanggil API untuk mendapatkan story berdasarkan lokasi
         RetrofitClient.instance.getAllStories("Bearer $token", location = 1)
             .enqueue(object : Callback<StoryResponse> {
                 override fun onResponse(call: Call<StoryResponse>, response: Response<StoryResponse>) {
@@ -81,7 +79,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun addMarker(story: Story) {
-        // Menambahkan marker pada lokasi cerita jika ada lat dan lon
         val position = LatLng(story.lat!!, story.lon!!)
         val markerOptions = MarkerOptions()
             .position(position)
@@ -94,7 +91,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun redirectToLogin() {
-        // Menghapus token dan mengarahkan ke LoginActivity
         getSharedPreferences("UserPrefs", MODE_PRIVATE).edit().clear().apply()
         startActivity(Intent(this, LoginActivity::class.java))
         finish()
